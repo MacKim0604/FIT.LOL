@@ -1,0 +1,14 @@
+# Node modules
+backend/node_modules/
+frontend/node_modules/
+
+# SQLite DB
+backend/db.sqlite
+
+# Build output
+frontend/build/
+
+# OS/IDE files
+.DS_Store
+Thumbs.db
+.env
