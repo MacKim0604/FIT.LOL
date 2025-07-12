@@ -16,8 +16,18 @@ app.use(bodyParser.json());
 app.get('/api/riot/latest-match/:name', async (req, res) => {
   const { name } = req.params;
   try {
-    const match = await getLatestMatchBySummonerName(name);
-    res.json(match);
+    // DB에서 name으로 tag도 함께 조회
+    db.get('SELECT tag FROM members WHERE name = ?', [name], async (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) return res.status(404).json({ error: '해당 멤버 없음' });
+      const tag = row.tag;
+      try {
+        const match = await getLatestMatchBySummonerName(name, tag);
+        res.json(match);
+      } catch (err2) {
+        res.status(400).json({ error: err2.message });
+      }
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -30,22 +40,23 @@ const db = new sqlite3.Database(dbPath);
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    tag TEXT
   )`);
 });
 
 // 멤버 추가
 app.post('/api/members', (req, res) => {
-  const { name } = req.body;
+  const { name, tag } = req.body;
   if (!name) {
     return res.status(400).json({ error: 'name 필수' });
   }
   db.run(
-    'INSERT INTO members (name) VALUES (?)',
-    [name],
+    'INSERT INTO members (name, tag) VALUES (?, ?)',
+    [name, tag ?? null],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name });
+      res.json({ id: this.lastID, name, tag });
     }
   );
 });

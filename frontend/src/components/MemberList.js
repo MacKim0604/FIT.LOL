@@ -40,6 +40,7 @@ function MemberList() {
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>이름</TableCell>
+              <TableCell>태그</TableCell>
               <TableCell>최근 전적</TableCell>
             </TableRow>
           </TableHead>
@@ -48,6 +49,7 @@ function MemberList() {
               <TableRow key={m.id}>
                 <TableCell>{m.id}</TableCell>
                 <TableCell>{m.name}</TableCell>
+                <TableCell>{m.tag || '-'}</TableCell>
                 <TableCell>
                   <Button size="small" variant="outlined" onClick={() => handleShowMatch(m.name)}>
                     최근 전적

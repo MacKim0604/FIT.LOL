@@ -4,6 +4,7 @@ import axios from 'axios';
 
 function MemberForm({ open, onClose, onSuccess }) {
   const [name, setName] = useState('');
+  const [tag, setTag] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
@@ -13,9 +14,11 @@ function MemberForm({ open, onClose, onSuccess }) {
     }
     try {
       await axios.post('http://localhost:4000/api/members', {
-        name
+        name,
+        tag: tag || undefined
       });
       setName('');
+      setTag('');
       setError('');
       if (onSuccess) onSuccess();
     } catch (e) {
@@ -34,6 +37,13 @@ function MemberForm({ open, onClose, onSuccess }) {
           fullWidth
           value={name}
           onChange={e => setName(e.target.value)}
+        />
+        <TextField
+          margin="dense"
+          label="태그 (예: 1234)"
+          fullWidth
+          value={tag}
+          onChange={e => setTag(e.target.value)}
         />
         {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
       </DialogContent>
