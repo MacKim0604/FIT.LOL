@@ -30,24 +30,22 @@ const db = new sqlite3.Database(dbPath);
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    line TEXT NOT NULL,
-    win_rate REAL
+    name TEXT NOT NULL
   )`);
 });
 
 // 멤버 추가
 app.post('/api/members', (req, res) => {
-  const { name, line, win_rate } = req.body;
-  if (!name || !line) {
-    return res.status(400).json({ error: 'name, line 필수' });
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'name 필수' });
   }
   db.run(
-    'INSERT INTO members (name, line, win_rate) VALUES (?, ?, ?)',
-    [name, line, win_rate ?? null],
+    'INSERT INTO members (name) VALUES (?)',
+    [name],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name, line, win_rate });
+      res.json({ id: this.lastID, name });
     }
   );
 });
