@@ -5,6 +5,7 @@ frontend/node_modules/
 
 # SQLite DB
 backend/db.sqlite
+backend/.env   
 
 # Build output
 frontend/build/
