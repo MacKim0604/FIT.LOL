@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
 import MemberForm from './MemberForm';
+import MemberMatchModal from './MemberMatchModal';
 import axios from 'axios';
 
 function MemberList() {
   const [members, setMembers] = useState([]);
   const [openForm, setOpenForm] = useState(false);
+  const [selectedSummoner, setSelectedSummoner] = useState(null);
 
   const fetchMembers = async () => {
     const res = await axios.get('http://localhost:4000/api/members');
@@ -23,6 +25,9 @@ function MemberList() {
     handleClose();
   };
 
+  const handleShowMatch = (name) => setSelectedSummoner(name);
+  const handleCloseMatchModal = () => setSelectedSummoner(null);
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
@@ -37,6 +42,7 @@ function MemberList() {
               <TableCell>이름</TableCell>
               <TableCell>라인</TableCell>
               <TableCell>승률</TableCell>
+              <TableCell>최근 전적</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -46,12 +52,18 @@ function MemberList() {
                 <TableCell>{m.name}</TableCell>
                 <TableCell>{m.line}</TableCell>
                 <TableCell>{m.win_rate !== null ? `${(m.win_rate * 100).toFixed(1)}%` : '-'}</TableCell>
+                <TableCell>
+                  <Button size="small" variant="outlined" onClick={() => handleShowMatch(m.name)}>
+                    최근 전적
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
       <MemberForm open={openForm} onClose={handleClose} onSuccess={handleSuccess} />
+      <MemberMatchModal open={!!selectedSummoner} onClose={handleCloseMatchModal} summonerName={selectedSummoner} />
     </Box>
   );
 }
