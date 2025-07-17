@@ -46,4 +46,7 @@ async function getLatestMatchBySummonerName(summonerName, tag) {
 
 module.exports = {
   getLatestMatchBySummonerName,
+  getPuuidBySummonerName,
+  getMatchIdsByPuuid,
+  getMatchDetail,
 };

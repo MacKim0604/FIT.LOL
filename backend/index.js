@@ -74,6 +74,61 @@ app.get('/api/members', (req, res) => {
   });
 });
 
+// 등록된 경기 목록 조회
+app.get('/api/matches', (req, res) => {
+  db.all('SELECT * FROM matches ORDER BY registeredAt DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// 경기 여러 건 등록
+app.post('/api/matches', (req, res) => {
+  const matches = req.body;
+  if (!Array.isArray(matches) || matches.length === 0) {
+    return res.status(400).json({ error: '등록할 경기가 없습니다.' });
+  }
+  const now = new Date().toISOString();
+  const stmt = db.prepare('INSERT OR IGNORE INTO matches (matchId, registeredAt, registrant) VALUES (?, ?, ?)');
+  matches.forEach(match => {
+    stmt.run(match.matchId, now, match.registrant || '');
+  });
+  stmt.finalize(err => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+app.get('/api/riot/matches/:name', async (req, res) => {
+  const { name } = req.params;
+  const count = parseInt(req.query.count, 10) || 5;
+  db.get('SELECT tag FROM members WHERE name = ?', [name], async (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: '해당 멤버 없음' });
+    const tag = row.tag;
+    try {
+      const puuid = await getPuuidBySummonerName(name, tag);
+      const matchIds = await getMatchIdsByPuuid(puuid, count);
+      // 각 matchId에 대해 간단 정보만 추출
+      const result = await Promise.all(matchIds.map(async (matchId) => {
+        try {
+          const detail = await getMatchDetail(matchId);
+          return {
+            matchId,
+            queueType: detail.info?.queueId || '-',
+            date: detail.info?.gameStartTimestamp ? new Date(detail.info.gameStartTimestamp).toISOString() : null
+          };
+        } catch {
+          return { matchId, queueType: '-', date: null };
+        }
+      }));
+      res.json(result);
+    } catch (err2) {
+      res.status(400).json({ error: err2.message });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
