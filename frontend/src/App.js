@@ -2,17 +2,22 @@ import React from 'react';
 import { CssBaseline, Box, Typography } from '@mui/material';
 import LNB from './components/LNB';
 import MemberList from './components/MemberList';
+import MatchRegister from './components/MatchRegister';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <Box sx={{ display: 'flex', height: '100vh', background: '#f9f9fb' }}>
-      <CssBaseline />
-      <LNB />
-      <Box component="main" sx={{ flexGrow: 1, p: 4 }}>
-        <Typography variant="h4" gutterBottom>FIT.LOL 멤버 관리</Typography>
-        <MemberList />
-      </Box>
-    </Box>
+    <Router>
+      <div style={{ display: 'flex' }}>
+        <LNB />
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<><Typography variant="h4" gutterBottom style={{ marginTop: 32, marginLeft: 32 }}>FIT.LOL 멤버 관리</Typography><MemberList /></>} />
+            <Route path="/matches" element={<MatchRegister />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 

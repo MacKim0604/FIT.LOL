@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { getLatestMatchBySummonerName } = require('./riot');
+const { getLatestMatchBySummonerName, getPuuidBySummonerName, getMatchIdsByPuuid, getMatchDetail } = require('./riot');
 
 const app = express();
 const PORT = 4000;
@@ -42,6 +42,11 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     tag TEXT
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS matches (
+    matchId TEXT PRIMARY KEY,
+    registeredAt TEXT,
+    registrant TEXT
   )`);
 });
 
