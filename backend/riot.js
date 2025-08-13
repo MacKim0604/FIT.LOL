@@ -44,9 +44,17 @@ async function getLatestMatchBySummonerName(summonerName, tag) {
   return matchDetail;
 }
 
+function getKDA(matchDetail, summonerName, tag) {
+  const participant = matchDetail.info.participants.find(p => (p.riotIdGameName === summonerName) && (p.riotIdTagline === tag));
+  if (!participant) throw new Error('No participant found');
+  const kda = `${participant.kills}/${participant.deaths}/${participant.assists}`;
+  return kda;
+}
+
 module.exports = {
   getLatestMatchBySummonerName,
   getPuuidBySummonerName,
   getMatchIdsByPuuid,
   getMatchDetail,
+  getKDA,
 };

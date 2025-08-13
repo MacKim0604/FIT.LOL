@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { getLatestMatchBySummonerName, getPuuidBySummonerName, getMatchIdsByPuuid, getMatchDetail } = require('./riot');
+const { getLatestMatchBySummonerName, getPuuidBySummonerName, getMatchIdsByPuuid, getMatchDetail, getKDA } = require('./riot');
 
 const app = express();
 const PORT = 4000;
@@ -116,12 +116,15 @@ app.get('/api/riot/matches/:name', async (req, res) => {
       const result = await Promise.all(pagedMatchIds.map(async (matchId) => {
         try {
           const detail = await getMatchDetail(matchId);
+          const kda = getKDA(detail, name, tag);
           return {
             matchId,
             queueType: detail.info?.queueId || '-',
-            date: detail.info?.gameStartTimestamp ? new Date(detail.info.gameStartTimestamp).toISOString() : null
+            date: detail.info?.gameStartTimestamp ? new Date(detail.info.gameStartTimestamp).toISOString() : null,
+            kda: kda
           };
-        } catch {
+        } catch (err) {
+          console.log('[DEBUG] error:', err);
           return { matchId, queueType: '-', date: null };
         }
       }));
