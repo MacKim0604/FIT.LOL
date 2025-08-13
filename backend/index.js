@@ -116,16 +116,26 @@ app.get('/api/riot/matches/:name', async (req, res) => {
       const result = await Promise.all(pagedMatchIds.map(async (matchId) => {
         try {
           const detail = await getMatchDetail(matchId);
-          const kda = getKDA(detail, name, tag);
+          // 해당 소환사 참가자 정보 찾기
+          let kda = null;
+          if (detail.info && detail.info.participants && Array.isArray(detail.info.participants)) {
+            const participant = detail.info.participants.find(p => p.puuid === puuid);
+            if (participant) {
+              kda = {
+                kills: participant.kills,
+                deaths: participant.deaths,
+                assists: participant.assists
+              };
+            }
+          }
           return {
             matchId,
             queueType: detail.info?.queueId || '-',
             date: detail.info?.gameStartTimestamp ? new Date(detail.info.gameStartTimestamp).toISOString() : null,
-            kda: kda
+            kda
           };
-        } catch (err) {
-          console.log('[DEBUG] error:', err);
-          return { matchId, queueType: '-', date: null };
+        } catch {
+          return { matchId, queueType: '-', date: null, kda: null };
         }
       }));
       res.json({ matches: result, total: matchIds.length });

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Table, TableHead, TableRow, TableCell, TableBody, Select, MenuItem, Typography, Switch, FormControlLabel, CircularProgress
+  Button, Table, TableHead, TableRow, TableCell, TableBody, Select, MenuItem, Typography, Checkbox, CircularProgress
 } from '@mui/material';
 import axios from 'axios';
 
@@ -77,24 +77,26 @@ function MatchAddModal({ open, onClose, members, onAddMatches }) {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>선택</TableCell>
+              <TableCell padding="checkbox"></TableCell>
               <TableCell>Match ID</TableCell>
-              <TableCell>게임 모드</TableCell>
-              <TableCell>날짜</TableCell>
+              <TableCell>Queue</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>KDA</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {matches.map(match => (
               <TableRow key={match.matchId}>
-                <TableCell>
-                  <FormControlLabel
-                    control={<Switch checked={!!selected[match.matchId]} onChange={() => handleToggle(match.matchId)} />}
-                    label=""
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={!!selected[match.matchId]}
+                    onChange={() => handleToggle(match.matchId)}
                   />
                 </TableCell>
                 <TableCell>{match.matchId}</TableCell>
-                <TableCell>{match.queueType || '-'}</TableCell>
+                <TableCell>{match.queueType}</TableCell>
                 <TableCell>{match.date ? new Date(match.date).toLocaleString() : '-'}</TableCell>
+                <TableCell>{match.kda ? `${match.kda.kills}/${match.kda.deaths}/${match.kda.assists}` : '-'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
