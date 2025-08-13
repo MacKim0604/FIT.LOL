@@ -101,16 +101,19 @@ app.post('/api/matches', (req, res) => {
 
 app.get('/api/riot/matches/:name', async (req, res) => {
   const { name } = req.params;
-  const count = parseInt(req.query.count, 10) || 5;
+  const page = parseInt(req.query.page, 10) || 1;
+  const pageSize = parseInt(req.query.pageSize, 10) || 5;
+  const start = (page - 1) * pageSize;
   db.get('SELECT tag FROM members WHERE name = ?', [name], async (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: '해당 멤버 없음' });
     const tag = row.tag;
     try {
       const puuid = await getPuuidBySummonerName(name, tag);
-      const matchIds = await getMatchIdsByPuuid(puuid, count);
-      // 각 matchId에 대해 간단 정보만 추출
-      const result = await Promise.all(matchIds.map(async (matchId) => {
+      // Riot API에서 최대 100개까지 받아와서 페이지네이션 처리
+      const matchIds = await getMatchIdsByPuuid(puuid, 100);
+      const pagedMatchIds = matchIds.slice(start, start + pageSize);
+      const result = await Promise.all(pagedMatchIds.map(async (matchId) => {
         try {
           const detail = await getMatchDetail(matchId);
           return {
@@ -122,7 +125,7 @@ app.get('/api/riot/matches/:name', async (req, res) => {
           return { matchId, queueType: '-', date: null };
         }
       }));
-      res.json(result);
+      res.json({ matches: result, total: matchIds.length });
     } catch (err2) {
       res.status(400).json({ error: err2.message });
     }

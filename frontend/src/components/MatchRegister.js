@@ -6,27 +6,41 @@ import {
 import axios from 'axios';
 
 // 경기 등록 모달: 멤버 선택 후 최근 경기 N건 조회 및 토글로 추가
+import MatchPagination from './MatchPagination';
+
 function MatchAddModal({ open, onClose, members, onAddMatches }) {
   const [selectedMember, setSelectedMember] = useState('');
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState({});
-  const [count, setCount] = useState(5);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     setMatches([]);
     setSelected({});
+    setPage(1);
+    setTotal(0);
   }, [open]);
 
-  const fetchMatches = async () => {
+  useEffect(() => {
+    if (open && selectedMember) fetchMatches(page);
+    // eslint-disable-next-line
+  }, [selectedMember, page]);
+
+  const fetchMatches = async (pageNum = 1) => {
     if (!selectedMember) return;
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:4000/api/riot/matches/${selectedMember}?count=${count}`);
-      setMatches(res.data || []);
+      const res = await axios.get(`http://localhost:4000/api/riot/matches/${selectedMember}?page=${pageNum}&pageSize=${pageSize}`);
+      setMatches(res.data.matches || []);
+      setTotal(res.data.total || 0);
       setSelected({});
+      console.log('[DEBUG] matches:', res.data.matches?.length, 'total:', res.data.total, 'page:', pageNum, 'pageSize:', pageSize);
     } catch (e) {
       setMatches([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -85,6 +99,7 @@ function MatchAddModal({ open, onClose, members, onAddMatches }) {
             ))}
           </TableBody>
         </Table>
+        <MatchPagination page={page} pageSize={pageSize} total={total} onChange={setPage} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>취소</Button>
