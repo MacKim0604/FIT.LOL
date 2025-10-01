@@ -85,6 +85,9 @@ function createServer() {
   app.use('/api/v1', apiLimiter);
 
   app.get('/api/v1/health', (_req, res) => {
+    /* #swagger.tags = ['Health'] */
+    /* #swagger.summary = 'Health check' */
+    /* #swagger.responses[200] = { description: 'OK' } */
     res.status(200).json({ success: true, data: { status: 'ok' } });
   });
 
