@@ -1,22 +1,19 @@
-# LolAPIService
+## 실행 방법
+{{ ... }}
+서버는 http://localhost:3001 에서 실행됩니다.
 
-A minimal Node.js (TypeScript) service with Controller/DTO/Service structure.
+## API 엔드포인트
 
-## Run locally
+- **[인증]** Riot 관련 엔드포인트는 Keycloak 토큰 필요
+  - 헤더: `Authorization: Bearer <access_token>`
 
-1. Install dependencies
-```
-npm install
-```
+### 기본 엔드포인트
+- GET `/api/v1/health` -> `{ success: true, data: { status: "ok" } }`
+- GET `/api/v1/hello` -> `{ success: true, data: { message: "Hello World from LolAPIService" } }`
 
-2. Start dev server
-```
-npm run dev
-```
-
-Server will listen on http://localhost:3001
-
-## Endpoints
-
-- GET `/health` -> `{ status: "ok" }`
-- GET `/api/hello` -> `{ message: "Hello World from LolAPIService" }`
+### Riot API 엔드포인트 (인증 필요)
+- GET `/api/v1/riot/latest-match/:summonerName/:tag`
+- GET `/api/v1/riot/match-history/:summonerName/:tag?count=10`
+- GET `/api/v1/riot/match/:matchId`
+- GET `/api/v1/riot/summoner/:summonerName/:tag/puuid`
+- GET `/api/v1/riot/matches/:puuid?count=20`
