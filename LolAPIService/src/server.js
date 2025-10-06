@@ -6,6 +6,7 @@ const jwksRsa = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 const { helloRouter } = require('./routes/hello.route');
 const { riotRouter } = require('./routes/riot.route');
+const path = require('path');
 
 function createServer() {
   const app = express();
@@ -93,6 +94,9 @@ function createServer() {
 
   app.use('/api/v1', helloRouter);
   app.use('/api/v1/riot', authenticate, requireRole('MEMBER'), riotRouter);
+  app.get('/api/docs', (_req, res) => {
+    res.sendFile(path.join(__dirname, '../docs.html'));
+  });
 
   // basic error handler
   app.use((err, _req, res, _next) => {
