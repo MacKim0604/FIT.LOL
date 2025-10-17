@@ -1,0 +1,97 @@
+// Prisma schema for RiotDataService (v1.0.3)
+// Provider: PostgreSQL
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  LEADER
+  MEMBER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  oidcSub   String?  @unique
+  username  String?
+  email     String?
+  role      Role?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  summoners Summoner[]
+}
+
+model Summoner {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+  puuid          String   @unique
+  summonerName   String?
+  summonerLevel  Int?
+  profileIconId  Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Match {
+  matchId            String   @id
+  gameStartTimestamp BigInt?
+  gameDuration       Int?
+  queueId            Int?
+  payload            Json?
+  createdAt          DateTime @default(now())
+  participants       MatchParticipant[]
+}
+
+model MatchParticipant {
+  id                         String  @id @default(cuid())
+  matchId                    String
+  match                      Match   @relation(fields: [matchId], references: [matchId])
+  puuid                      String
+  riotIdName                 String?
+  riotIdTagline              String?
+  kills                      Int?
+  deaths                     Int?
+  assists                    Int?
+  kda                        String?
+  championName               String?
+  win                        Boolean?
+  totalDamageDealtToChampions Int?
+  goldEarned                 Int?
+  totalMinionsKilled         Int?
+  visionScore                Int?
+  teamPosition               String?
+  lane                       String?
+
+  @@unique([matchId, puuid])
+}
+
+model IngestionCursor {
+  id                  String   @id @default(cuid())
+  puuid               String   @unique
+  lastMatchTimestamp  BigInt?
+  lastMatchId         String?
+  lastFetchedCount    Int      @default(0)
+  updatedAt           DateTime @updatedAt
+}
+
+model JobLog {
+  id          String   @id @default(cuid())
+  jobType     String
+  jobId       String?
+  status      String
+  puuid       String?
+  matchId     String?
+  errorMsg    String?
+  retryCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([jobType, status])
+  @@index([puuid])
+}
