@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { authRouter } = require('./routes/auth.route');
 const { clanRouter } = require('./routes/clan.route');
+const { ingestionProxyRouter } = require('./routes/ingestion.proxy.route');
+const { authenticate, requireRole } = require('./middlewares/auth');
 
 function createServer() {
   const app = express();
@@ -35,6 +37,7 @@ function createServer() {
 
   app.use('/api/v1', authRouter);
   app.use('/api/v1/clan', clanRouter);
+  app.use('/api/v1/ingestion', authenticate, requireRole('LEADER'), ingestionProxyRouter);
 
   // basic error handler
   app.use((err, _req, res, _next) => {
@@ -46,3 +49,4 @@ function createServer() {
 }
 
 module.exports = { createServer };
+
